@@ -1,27 +1,58 @@
 # Rxjs
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.0.0.
+## Observables
 
-## Development server
+RxJS Observables emit values over time - you can set up subscriptions to handle them
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+In order to listen to values that emitted and in order to use them, you must set a subscription (For every observable)
 
-## Code scaffolding
+```
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+import { interval } from 'rxjs';
 
-## Build
+@Component({
+  selector: 'app-root',
+  standalone: true,
+  templateUrl: './app.component.html'
+})
+export class AppComponent implements OnInit {
+  private destroyRef = inject(DestroyRef);
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+  ngOnInit(): void {
+    const subscription = interval(1000).subscribe({
+      next: (val) => console.log(val),
+      complete: () => {},
+      error: () => {}
+    });
 
-## Running unit tests
+    this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe();
+    })
+  }
+}
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+By the default, interval will do nothing, unless you have subscriber, because internally rxjs recognizes that if there is no one who is interested in values, it does not make sense to emit any
 
-## Running end-to-end tests
+<br>
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+## RxJs Operators
 
-## Further help
+Operators are the functions you can pipe into your observable data stream to perform transformations or any other kind of operation on those observable values
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+ngOnInit(): void {
+    const subscription = interval(1000).pipe(
+      map((val) => val * 2)
+    ).subscribe({
+      next: (val) => console.log(val),
+      complete: () => {},
+      error: () => {}
+    });
+
+    this.destroyRef.onDestroy(() => {
+      subscription.unsubscribe();
+    })
+  }
+```
